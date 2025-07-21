@@ -1,0 +1,31 @@
+repo = "helix-editor/helix"
+
+remote-branch = "master"
+
+local-branch = "patchy"
+
+pull-requests = [
+  "8675", # steel plugin system [patched chaotically]
+  "12369", # icons v2 (merge conflict with 13206)
+  "13666", # status element styling
+  "13197", # welcome screen
+  "12806", # path in file picker
+  "7783", # horizontal picker preview
+  "11497", # rounded corners
+  "13318", # allow themeing the status bar
+
+  "12944", # ":left" ":center" and ":right" (didnt actually use it)
+
+  # "13206", # word completion (merged)
+  # I have no clue how to create more than one patch
+  # "8362", # scroll bufferline (conflict)
+  # "11790", # move buffers in the bufferline (conflict)
+  # "12151", # allow themeing the items in completion (merge conflict)
+  # "13448", # harpoon2 for helix (need to look into what it does...)
+  # "13530", # rainbow brackets (merge conflict)
+  # "13306", # add custom icon for color swatches (merge conflict)
+  # "12520", # Picker titles (merge conflict)
+  # "13627", # better file sizes (merged)
+]
+
+patches = []
