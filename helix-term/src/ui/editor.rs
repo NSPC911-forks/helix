@@ -24,9 +24,10 @@ use helix_core::{
 };
 use helix_view::{
     annotations::diagnostics::DiagnosticFilter,
-    document::{Mode, SCRATCH_BUFFER_NAME},
+    document::{Mode, DEFAULT_LANGUAGE_NAME, SCRATCH_BUFFER_NAME},
     editor::{CompleteAction, CursorShapeConfig},
     graphics::{Color, CursorKind, Modifier, Rect, Style},
+    icons::ICONS,
     input::{KeyEvent, MouseButton, MouseEvent, MouseEventKind},
     keyboard::{KeyCode, KeyModifiers},
     Document, Editor, Theme, View,
@@ -582,7 +583,7 @@ impl EditorView {
         let mut x = viewport.x;
         let current_doc = view!(editor).doc;
 
-        for doc in editor.documents() {
+        for (idx, doc) in editor.documents().enumerate() {
             let fname = doc
                 .path()
                 .unwrap_or(&scratch)
@@ -597,7 +598,45 @@ impl EditorView {
                 bufferline_inactive
             };
 
-            let text = format!(" {}{} ", fname, if doc.is_modified() { "[+]" } else { "" });
+            let lang = doc.language_name().unwrap_or(DEFAULT_LANGUAGE_NAME);
+
+            let icons = ICONS.load();
+
+            // Render the separator before the text if the current document is not first.
+            if idx > 0 {
+                let used_width = viewport.x.saturating_sub(x);
+                let rem_width = surface.area.width.saturating_sub(used_width);
+                x = surface
+                    .set_stringn(
+                        x,
+                        viewport.y,
+                        icons.ui().bufferline().separator(),
+                        rem_width as usize,
+                        bufferline_inactive,
+                    )
+                    .0;
+            }
+
+            if let Some(icon) = icons
+                .fs()
+                .from_optional_path_or_lang(doc.path().map(|path| path.as_path()), lang)
+            {
+                let used_width = viewport.x.saturating_sub(x);
+                let rem_width = surface.area.width.saturating_sub(used_width);
+
+                let style = icon.color().map_or(style, |color| style.fg(color));
+
+                x = surface
+                    .set_stringn(x, viewport.y, format!(" {icon}"), rem_width as usize, style)
+                    .0;
+
+                if x >= surface.area.right() {
+                    break;
+                }
+            }
+
+            let text = format!(" {} {}", fname, if doc.is_modified() { "[+] " } else { "" });
+
             let used_width = viewport.x.saturating_sub(x);
             let rem_width = surface.area.width.saturating_sub(used_width);
 
