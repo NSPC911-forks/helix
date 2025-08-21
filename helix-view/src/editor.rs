@@ -664,6 +664,7 @@ impl Display for StatusLineElement {
             Spacer => "spacer",
             VersionControl => "version-control",
             Register => "register",
+            CurrentWorkingDirectory => "current-working-directory",
         };
         write!(f, "{element}")
     }

@@ -597,8 +597,11 @@ where
     F: Fn(&mut RenderContext<'a>, Span<'a>) + Copy,
 {
 
-    let sep = context.editor.config().statusline.separator.clone();
-    write(context, sep.into());
+    let style = context.editor.theme.get("ui.statusline.separator");
+    let icons = ICONS.load();
+    let separator = icons.ui().statusline().separator().to_string();
+
+    write(context, Span::styled(separator, style));
 }
 
 fn render_spacer<'a, F>(context: &mut RenderContext<'a>, write: F)
