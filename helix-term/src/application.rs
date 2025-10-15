@@ -1,4 +1,5 @@
 use arc_swap::{access::Map, ArcSwap};
+use crossterm::tty::IsTty;
 use futures_util::Stream;
 use helix_core::{diagnostic::Severity, pos_at_coords, syntax, Range, Selection};
 use helix_lsp::{
@@ -259,10 +260,12 @@ impl Application {
             }
         } else if stdin().is_terminal() || cfg!(feature = "integration") {
             editor.new_file(Action::VerticalSplit);
+        } else if stdin().is_tty() || cfg!(feature = "integration") {
+            editor.new_file_welcome();
         } else {
             editor
                 .new_file_from_stdin(Action::VerticalSplit)
-                .unwrap_or_else(|_| editor.new_file(Action::VerticalSplit));
+                .unwrap_or_else(|_| editor.new_file_welcome());
         }
 
         #[cfg(windows)]
