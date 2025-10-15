@@ -43,7 +43,15 @@ static PLUGIN_PRECEDENCE: once_cell::sync::OnceCell<Vec<PluginSystemTypes>> =
     once_cell::sync::OnceCell::new();
 
 fn plugins() -> impl Iterator<Item = &'static PluginSystemTypes> {
-    PLUGIN_PRECEDENCE.get().unwrap().iter()
+    PLUGIN_PRECEDENCE
+        .get_or_init(|| {
+            vec![
+                #[cfg(feature = "steel")]
+                PluginSystemTypes::Steel(steel::SteelScriptingEngine),
+                PluginSystemTypes::None(NoEngine),
+            ]
+        })
+        .iter()
 }
 
 pub struct NoEngine;

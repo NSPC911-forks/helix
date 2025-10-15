@@ -888,21 +888,11 @@ fn ws_visible(config: &mut WhitespaceConfig, option: bool) {
     config.render = WhitespaceRender::Basic(value);
 }
 
-fn ws_chars(config: &mut WhitespaceConfig, option: HashMap<SteelVal, char>) -> anyhow::Result<()> {
-    for (k, v) in option {
-        match k {
-            SteelVal::StringV(s) | SteelVal::SymbolV(s) => match s.as_str() {
-                "space" => config.characters.space = v,
-                "tab" => config.characters.tab = v,
-                "nbsp" => config.characters.nbsp = v,
-                "nnbsp" => config.characters.nnbsp = v,
-                "newline" => config.characters.newline = v,
-                "tabpad" => config.characters.tabpad = v,
-                unknown => anyhow::bail!("Unrecognized key: {}", unknown),
-            },
-            other => anyhow::bail!("Unrecognized key option: {}", other),
-        }
-    }
+// Note: Whitespace character configuration has been removed from Helix.
+// The WhitespaceConfig only controls rendering now, not the actual characters.
+fn ws_chars(_config: &mut WhitespaceConfig, _option: HashMap<SteelVal, char>) -> anyhow::Result<()> {
+    // This function is now a no-op as whitespace character customization has been removed.
+    log::warn!("Whitespace character configuration is no longer supported in Helix");
     Ok(())
 }
 
