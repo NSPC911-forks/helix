@@ -887,9 +887,19 @@ impl EditorView {
             .try_get("ui.bufferline")
             .unwrap_or_else(|| editor.theme.get("ui.statusline.inactive"));
 
-        let mut x = viewport.x;
         let current_doc = view!(editor).doc;
+        let icons = ICONS.load();
 
+        // Precompute tab entries with widths to support auto-scrolling window
+        struct TabEntry {
+            id: helix_view::DocumentId,
+            icon_text: Option<String>,
+            icon_color: Option<Color>,
+            label_text: String,
+            total_width: usize,
+        }
+
+        let mut tabs: Vec<TabEntry> = Vec::new();
         for doc in editor.documents() {
             let fname = doc
                 .path()
@@ -899,48 +909,81 @@ impl EditorView {
                 .to_str()
                 .unwrap_or_default();
 
-            let style = if current_doc == doc.id() {
-                bufferline_active
-            } else {
-                bufferline_inactive
-            };
-
-            let icons = ICONS.load();
-
             let lang = doc.language_name().unwrap_or(DEFAULT_LANGUAGE_NAME);
-
-            if let Some(icon) = icons
+            let icon = icons
                 .fs()
-                .from_optional_path_or_lang(doc.path().map(|path| path.as_path()), lang)
-            {
-                let used_width = viewport.x.saturating_sub(x);
-                let rem_width = surface.area.width.saturating_sub(used_width);
+                .from_optional_path_or_lang(doc.path().map(|path| path.as_path()), lang);
 
-                let style = icon.color().map_or(style, |color| style.fg(color));
+            let icon_text = icon.as_ref().map(|i| format!(" {i}"));
+            let icon_color = icon.as_ref().and_then(|i| i.color());
+            let icon_width = icon_text.as_deref().map_or(0, UnicodeWidthStr::width);
 
-                x = surface
-                    .set_stringn(x, viewport.y, format!(" {icon}"), rem_width as usize, style)
-                    .0;
+            // Keep the current spacing and modified marker convention
+            let label_text = format!(" {} {}", fname, if doc.is_modified() { "[+] " } else { "" });
+            let label_width = UnicodeWidthStr::width(label_text.as_str());
 
-                if x >= surface.area.right() {
-                    break;
+            tabs.push(TabEntry {
+                id: doc.id(),
+                icon_text,
+                icon_color,
+                label_text,
+                total_width: icon_width + label_width,
+            });
+        }
+
+        // Determine start index so that the active tab is visible within viewport
+        let mut start = 0usize;
+        if !tabs.is_empty() {
+            let view_width = viewport.width as usize;
+            if view_width > 0 {
+                if let Some(cur_idx) = tabs.iter().position(|t| t.id == current_doc) {
+                    // If everything fits, start from 0
+                    let total_width_all: usize = tabs.iter().map(|t| t.total_width).sum();
+                    if total_width_all > view_width {
+                        // Move start leftwards as much as possible while keeping [start..=cur_idx] within width
+                        start = cur_idx;
+                        let mut sum = tabs[cur_idx].total_width;
+                        while start > 0 {
+                            let next = tabs[start - 1].total_width;
+                            if sum + next <= view_width { 
+                                start -= 1; 
+                                sum += next; 
+                            } else {
+                                break;
+                            }
+                        }
+                    }
                 }
             }
+        }
 
-            let text = format!(" {} {}", fname, if doc.is_modified() { "[+] " } else { "" });
+        // Render from the computed start until we run out of space
+        let mut x = viewport.x;
+        for tab in tabs.into_iter().skip(start) {
+            let is_active = tab.id == current_doc;
+            let base_style = if is_active { bufferline_active } else { bufferline_inactive };
+
+            if let Some(icon_text) = &tab.icon_text {
+                let used_width = viewport.x.saturating_sub(x);
+                let rem_width = surface.area.width.saturating_sub(used_width);
+                let style = tab
+                    .icon_color
+                    .map_or(base_style, |color| base_style.fg(color));
+                x = surface
+                    .set_stringn(x, viewport.y, icon_text, rem_width as usize, style)
+                    .0;
+                if x >= surface.area.right() { break; }
+            }
 
             let used_width = viewport.x.saturating_sub(x);
             let rem_width = surface.area.width.saturating_sub(used_width);
-
             x = surface
-                .set_stringn(x, viewport.y, text, rem_width as usize, style)
+                .set_stringn(x, viewport.y, tab.label_text, rem_width as usize, base_style)
                 .0;
-
-            if x >= surface.area.right() {
-                break;
-            }
+            if x >= surface.area.right() { break; }
         }
     }
+
 
     pub fn render_gutter<'d>(
         editor: &'d Editor,
