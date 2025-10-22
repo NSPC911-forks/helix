@@ -175,53 +175,59 @@ impl EditorView {
             ),
             empty_line(),
             (
-                Span::styled(
-                    "A post-modern modal text editor",
-                    theme.get("ui.text").add_modifier(Modifier::ITALIC),
-                )
+                vec![
+                    Span::raw("A "),
+                    Span::styled(
+                        "post-modern",
+                        theme.get("ui.text").add_modifier(Modifier::ITALIC),
+                    ),
+                    Span::raw(" modal text editor")
+                ]
                 .into(),
                 Center,
             ),
             empty_line(),
             (
                 vec![
-                    Span::styled(":tutor", theme.get("markup.raw")),
-                    Span::styled("<enter>", theme.get("comment")),
-                    Span::raw("       learn helix"),
+                    Span::raw(""),
+                    Span::styled(":scooter", theme.get("markup.raw")),
+                    Span::raw(" │ start scooter"),
                 ]
                 .into(),
                 Left,
             ),
             (
                 vec![
-                    Span::styled(":theme", theme.get("markup.raw")),
-                    Span::styled("<space><tab>", theme.get("comment")),
-                    Span::raw("  choose a theme"),
+                    Span::raw("     "),
+                    Span::styled("wai", theme.get("markup.raw")),
+                    Span::raw(" │ start opencode"),
                 ]
                 .into(),
                 Left,
             ),
             (
                 vec![
-                    Span::styled("<space>e", theme.get("markup.raw")),
-                    Span::raw("            file explorer"),
+                    Span::raw(""),
+                    Span::styled("<space>f", theme.get("markup.raw")),
+                    Span::raw(" │ file explorer"),
                 ]
                 .into(),
                 Left,
             ),
             (
                 vec![
+                    Span::raw(""),
                     Span::styled("<space>?", theme.get("markup.raw")),
-                    Span::raw("            see all commands"),
+                    Span::raw(" │ search commands"),
                 ]
                 .into(),
                 Left,
             ),
             (
                 vec![
+                    Span::raw("   "),
                     Span::styled(":quit", theme.get("markup.raw")),
-                    Span::styled("<enter>", theme.get("comment")),
-                    Span::raw("        quit helix"),
+                    Span::raw(" │ quit helix"),
                 ]
                 .into(),
                 Left,
