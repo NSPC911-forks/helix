@@ -1,3 +1,4 @@
+use crossterm::tty::IsTty;
 use arc_swap::{access::Map, ArcSwap};
 use futures_util::Stream;
 use helix_core::{diagnostic::Severity, pos_at_coords, syntax, Range, Selection};

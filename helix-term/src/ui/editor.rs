@@ -81,16 +81,16 @@ impl EditorView {
     pub fn render_welcome(theme: &Theme, view: &View, surface: &mut Surface, is_colorful: bool) {
         /// Logo for Helix
         const LOGO_STR: &str = "\
-**             
+**
 *****        ::
  ******** :::::
-     **::::::: 
+     **:::::::
    ::::::::***=
 :::::::    ====
 ::::    =======
-:---========   
- =======--     
-===== -------- 
+:---========
+ =======--
+===== --------
 ==        -----
              --";
 
@@ -174,53 +174,59 @@ impl EditorView {
             ),
             empty_line(),
             (
-                Span::styled(
-                    "A post-modern modal text editor",
-                    theme.get("ui.text").add_modifier(Modifier::ITALIC),
-                )
+                vec![
+                    Span::raw("A "),
+                    Span::styled(
+                        "post-modern",
+                        theme.get("ui.text").add_modifier(Modifier::ITALIC),
+                    ),
+                    Span::raw(" modal text editor")
+                ]
                 .into(),
                 Center,
             ),
             empty_line(),
             (
                 vec![
-                    Span::styled(":tutor", theme.get("markup.raw")),
-                    Span::styled("<enter>", theme.get("comment")),
-                    Span::raw("       learn helix"),
+                    Span::raw(""),
+                    Span::styled(":scooter", theme.get("markup.raw")),
+                    Span::raw(" │ start scooter"),
                 ]
                 .into(),
                 Left,
             ),
             (
                 vec![
-                    Span::styled(":theme", theme.get("markup.raw")),
-                    Span::styled("<space><tab>", theme.get("comment")),
-                    Span::raw("  choose a theme"),
+                    Span::raw("     "),
+                    Span::styled("wai", theme.get("markup.raw")),
+                    Span::raw(" │ start opencode"),
                 ]
                 .into(),
                 Left,
             ),
             (
                 vec![
-                    Span::styled("<space>e", theme.get("markup.raw")),
-                    Span::raw("            file explorer"),
+                    Span::raw(""),
+                    Span::styled("<space>f", theme.get("markup.raw")),
+                    Span::raw(" │ file explorer"),
                 ]
                 .into(),
                 Left,
             ),
             (
                 vec![
+                    Span::raw(""),
                     Span::styled("<space>?", theme.get("markup.raw")),
-                    Span::raw("            see all commands"),
+                    Span::raw(" │ search commands"),
                 ]
                 .into(),
                 Left,
             ),
             (
                 vec![
+                    Span::raw("   "),
                     Span::styled(":quit", theme.get("markup.raw")),
-                    Span::styled("<enter>", theme.get("comment")),
-                    Span::raw("        quit helix"),
+                    Span::raw(" │ quit helix"),
                 ]
                 .into(),
                 Left,
@@ -235,7 +241,7 @@ impl EditorView {
                 Center,
             ),
             empty_line(),
-        ];
+        ];;
 
         debug_assert!(
             raw_help_lines.len() >= LOGO_STR.lines().count(),
@@ -432,7 +438,7 @@ impl EditorView {
 
         Self::render_rulers(editor, doc, view, inner, surface, theme);
 
-        if config.welcome_screen && doc.version() == 0 && doc.is_welcome {
+        if config.welcome_screen && doc.path().is_none() && doc.version() == 0 && editor.documents.len() == 1 {
             Self::render_welcome(
                 theme,
                 view,
