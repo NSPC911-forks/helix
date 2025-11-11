@@ -67,6 +67,7 @@ pub fn render(context: &mut RenderContext, viewport: Rect, surface: &mut Surface
     for element_id in &config.statusline.left {
         let render = get_render_function(*element_id);
         (render)(context, |context, span| {
+            let base_style = statusline_style(context, &element_id.to_string());
             append(&mut context.parts.left, span, base_style)
         });
     }
@@ -83,6 +84,7 @@ pub fn render(context: &mut RenderContext, viewport: Rect, surface: &mut Surface
     for element_id in &config.statusline.right {
         let render = get_render_function(*element_id);
         (render)(context, |context, span| {
+            let base_style = statusline_style(context, &element_id.to_string());
             append(&mut context.parts.right, span, base_style)
         })
     }
@@ -102,6 +104,7 @@ pub fn render(context: &mut RenderContext, viewport: Rect, surface: &mut Surface
     for element_id in &config.statusline.center {
         let render = get_render_function(*element_id);
         (render)(context, |context, span| {
+            let base_style = statusline_style(context, &element_id.to_string());
             append(&mut context.parts.center, span, base_style)
         })
     }
@@ -158,6 +161,22 @@ where
         helix_view::editor::StatusLineElement::VersionControl => render_version_control,
         helix_view::editor::StatusLineElement::Register => render_register,
         helix_view::editor::StatusLineElement::CurrentWorkingDirectory => render_cwd,
+    }
+}
+
+fn statusline_style(context: &RenderContext, scope: &str) -> Style {
+    let scope = if context.focused {
+        format!("ui.statusline.{scope}")
+    } else {
+        format!("ui.statusline.inactive.{scope}")
+    };
+
+    let config = context.editor.config();
+
+    if config.color_modes {
+        context.editor.theme.get(&scope)
+    } else {
+        Style::default()
     }
 }
 
@@ -440,7 +459,7 @@ where
     let maxrows = context.doc.text().len_lines();
     write(
         context,
-        format!("{}%", (position.row + 1) * 100 / maxrows).into(),
+        format!(" {}% ", (position.row + 1) * 100 / maxrows).into(),
     );
 }
 
@@ -534,11 +553,7 @@ fn render_file_modification_indicator<'a, F>(context: &mut RenderContext<'a>, wr
 where
     F: Fn(&mut RenderContext<'a>, Span<'a>) + Copy,
 {
-    let title = if context.doc.is_modified() {
-        "[+]"
-    } else {
-        "   "
-    };
+    let title = if context.doc.is_modified() { "[+]" } else { "" };
 
     write(context, title.into());
 }
@@ -575,13 +590,10 @@ fn render_separator<'a, F>(context: &mut RenderContext<'a>, write: F)
 where
     F: Fn(&mut RenderContext<'a>, Span<'a>) + Copy,
 {
+    let sep = &context.editor.config().statusline.separator;
     let style = context.editor.theme.get("ui.statusline.separator");
 
-    let icons = ICONS.load();
-
-    let separator = icons.ui().statusline().separator().to_string();
-
-    write(context, Span::styled(separator, style));
+    write(context, Span::styled(sep.to_string(), style));
 }
 
 fn render_spacer<'a, F>(context: &mut RenderContext<'a>, write: F)
@@ -622,11 +634,10 @@ fn render_file_indent_style<'a, F>(context: &mut RenderContext<'a>, write: F)
 where
     F: Fn(&mut RenderContext<'a>, Span<'a>) + Copy,
 {
-    let style = context.doc.indent_style;
-
+    let indent_style = context.doc.indent_style;
     write(
         context,
-        match style {
+        match indent_style {
             IndentStyle::Tabs => " tabs ".into(),
             IndentStyle::Spaces(indent) => {
                 format!(" {} space{} ", indent, if indent == 1 { "" } else { "s" }).into()
