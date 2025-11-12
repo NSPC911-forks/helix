@@ -47,6 +47,7 @@ pub fn render_document(
         Position::new(offset.vertical_offset, offset.horizontal_offset),
         viewport,
     );
+
     render_text(
         &mut renderer,
         doc.text().slice(..),
