@@ -170,6 +170,7 @@ impl Application {
                 crate::commands::engine::TerminalEventReaderHandle::new(terminal.backend()),
             );
         }
+        let jobs = Jobs::new();
 
         if args.load_tutor {
             let path = helix_loader::runtime_file(Path::new("tutor"));
