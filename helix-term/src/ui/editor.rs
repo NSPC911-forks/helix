@@ -244,7 +244,7 @@ impl EditorView {
                 Center,
             ),
             empty_line(),
-        ];;
+        ];
 
         debug_assert!(
             raw_help_lines.len() >= LOGO_STR.lines().count(),
