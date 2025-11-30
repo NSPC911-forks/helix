@@ -91,7 +91,7 @@ static GLOBAL_OFFSET: AtomicUsize = AtomicUsize::new(0);
 
 static EVENT_READER: OnceCell<EventReader> = OnceCell::new();
 
-fn install_event_reader(event_reader: TerminalEventReaderHandle) {
+fn install_event_reader(_event_reader: TerminalEventReaderHandle) {
     #[cfg(feature = "integration")]
     {}
 
@@ -1016,22 +1016,10 @@ fn ws_visible(config: &mut WhitespaceConfig, option: bool) {
     config.render = WhitespaceRender::Basic(value);
 }
 
-fn ws_chars(config: &mut WhitespaceConfig, option: HashMap<SteelVal, char>) -> anyhow::Result<()> {
-    for (k, v) in option {
-        match k {
-            SteelVal::StringV(s) | SteelVal::SymbolV(s) => match s.as_str() {
-                "space" => config.characters.space = v,
-                "tab" => config.characters.tab = v,
-                "nbsp" => config.characters.nbsp = v,
-                "nnbsp" => config.characters.nnbsp = v,
-                "newline" => config.characters.newline = v,
-                "tabpad" => config.characters.tabpad = v,
-                unknown => anyhow::bail!("Unrecognized key: {}", unknown),
-            },
-            other => anyhow::bail!("Unrecognized key option: {}", other),
-        }
-    }
-    Ok(())
+fn ws_chars(_config: &mut WhitespaceConfig, _option: HashMap<SteelVal, char>) -> anyhow::Result<()> {
+    // Note: WhitespaceConfig no longer has a characters field in the current version
+    // This function is kept for compatibility but does nothing
+    anyhow::bail!("Whitespace character configuration is no longer supported in this version")
 }
 
 fn ws_render(config: &mut WhitespaceConfig, option: HashMap<SteelVal, bool>) -> anyhow::Result<()> {
@@ -4128,8 +4116,10 @@ impl HelixConfiguration {
             app_config.editor.statusline.right = steel_list_to_elements(right)?;
         }
 
-        if let Some(separator) = config.get("separator") {
-            app_config.editor.statusline.separator = String::from_steelval(separator)?;
+        // Note: StatusLineConfig no longer has a separator field in the current version
+        // This configuration option is no longer supported
+        if let Some(_separator) = config.get("separator") {
+            // Separator configuration is no longer supported
         }
 
         if let Some(normal_mode) = config.get("mode-normal") {
@@ -6576,7 +6566,7 @@ pub fn custom_insert_newline(cx: &mut Context, indent: String) {
                 // insert an additional line which is indented one level
                 // more and place the cursor there
                 let on_auto_pair = doc
-                    .auto_pairs(cx.editor, loader, view)
+                    .auto_pairs(cx.editor, &cx.editor.syn_loader.load(), view)
                     .and_then(|pairs| pairs.get(prev))
                     .map_or(false, |pair| pair.open == prev && pair.close == curr);
 
