@@ -404,7 +404,7 @@ where
         if count == 1 {
             " 1 sel ".into()
         } else {
-            format!(" {}/{count} sels ", selection.primary_index() + 1).into()
+            format!(" {}/{count} ", selection.primary_index() + 1).into()
         },
     );
 }
@@ -600,7 +600,6 @@ where
 
     write(context, Span::styled(separator, style));
 }
-
 fn render_spacer<'a, F>(context: &mut RenderContext<'a>, write: F)
 where
     F: Fn(&mut RenderContext<'a>, Span<'a>) + Copy,
