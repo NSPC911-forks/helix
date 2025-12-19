@@ -14,7 +14,7 @@ pull-requests = [
   "13318", # allow themeing the status bar
   "12944", # ":left" ":center" and ":right" (didnt actually use it)
   "14118", # rainbow indent guides
-  "14072", # scroll bufferline (conflict)
+  # "14072", # scroll bufferline (conflict)
 
   # "13206", # word completion (merged)
   # "13627", # better file sizes (merged)
