@@ -487,8 +487,6 @@ impl MappableCommand {
         goto_previous_buffer, "Goto previous buffer",
         goto_line_end_newline, "Goto newline at line end",
         goto_first_nonwhitespace, "Goto first non-blank in line",
-        goto_next_buffer, "Goto next buffer",
-        goto_previous_buffer, "Goto previous buffer",
         move_buffer_left, "Move focused buffer to the left",
         move_buffer_right, "Move focused buffer to the right",
         move_buffer_start, "Move focused buffer to the start of the buffer list",
