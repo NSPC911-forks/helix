@@ -100,3 +100,6 @@
 | `:workspace-trust` | Allow language servers and local config for the current workspace. |
 | `:workspace-untrust` | Revoke the current workspace's trust grant or exclusion. |
 | `:workspace-exclude` | Mark the current workspace as never-prompt. Never prompts for trust again. |
+| `:align-text-left`, `:atl` | Align text to the left |
+| `:align-text-center`, `:atc` | Center-align text, optionally pass a number overriding the current document's text width |
+| `:align-text-right`, `:atr` | Align text to the right, optionally pass a number overriding the current document's text width |
