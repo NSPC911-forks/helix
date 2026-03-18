@@ -27,6 +27,7 @@ use std::{
     borrow::Cow,
     cell::Cell,
     collections::{BTreeMap, HashMap, HashSet, VecDeque},
+    fmt::Display,
     fs,
     io::{self, stdin},
     num::{NonZeroU8, NonZeroUsize},
@@ -823,6 +824,41 @@ pub enum StatusLineElement {
     #[cfg(feature = "steel")]
     #[serde(skip)]
     Custom(crate::extension::steel_implementations::CustomStatusElement),
+}
+
+impl Display for StatusLineElement {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        use StatusLineElement::*;
+        let element = match self {
+            Mode => "mode",
+            Spinner => "spinner",
+            FileBaseName => "file-base-name",
+            FileName => "file-name",
+            FileAbsolutePath => "file-absolute-path",
+            FileModificationIndicator => "file-modification-indicator",
+            ReadOnlyIndicator => "read-only-indicator",
+            FileEncoding => "file-encoding",
+            FileLineEnding => "file-line-ending",
+            FileIndentStyle => "file-indent-style",
+            FileType => "file-type",
+            Diagnostics => "diagnostics",
+            WorkspaceDiagnostics => "workspace-diagnostics",
+            Selections => "selections",
+            PrimarySelectionLength => "primary-selection-length",
+            Position => "position",
+            Separator => "separator",
+            PositionPercentage => "position-percentage",
+            TotalLineNumbers => "total-line-numbers",
+            Spacer => "spacer",
+            VersionControl => "version-control",
+            Register => "register",
+            CurrentWorkingDirectory => "current-working-directory",
+            CodeActionHint => "code-action-hint",
+            #[cfg(feature = "steel")]
+            Custom(_) => "custom",
+        };
+        write!(f, "{element}")
+    }
 }
 
 // Cursor shape is read and used on every rendered frame and so needs

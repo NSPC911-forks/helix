@@ -91,6 +91,7 @@ pub fn render(context: &mut RenderContext, viewport: Rect, surface: &mut Surface
             }
             let render = get_render_function(&$element);
             (render)(context, |context, span| {
+                let base_style = statusline_style(context, &$element.to_string());
                 append(&mut context.parts.$side, span, base_style)
             });
         };
@@ -186,6 +187,22 @@ where
         helix_view::editor::StatusLineElement::CodeActionHint => render_code_action_hint,
         #[cfg(feature = "steel")]
         _ => unreachable!(),
+    }
+}
+
+fn statusline_style(context: &RenderContext, scope: &str) -> Style {
+    let scope = if context.focused {
+        format!("ui.statusline.{scope}")
+    } else {
+        format!("ui.statusline.inactive.{scope}")
+    };
+
+    let config = context.editor.config();
+
+    if config.color_modes {
+        context.editor.theme.get(&scope)
+    } else {
+        Style::default()
     }
 }
 
@@ -429,7 +446,7 @@ where
     let maxrows = get_doc(context).text().len_lines();
     write(
         context,
-        format!("{}%", (position.row + 1) * 100 / maxrows).into(),
+        format!(" {}% ", (position.row + 1) * 100 / maxrows).into(),
     );
 }
 
