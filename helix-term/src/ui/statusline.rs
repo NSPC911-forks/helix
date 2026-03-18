@@ -404,7 +404,7 @@ where
         if count == 1 {
             " 1 sel ".into()
         } else {
-            format!(" {}/{count} sels ", selection.primary_index() + 1).into()
+            format!(" {}/{count} ", selection.primary_index() + 1).into()
         },
     );
 }

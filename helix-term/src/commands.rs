@@ -484,8 +484,6 @@ impl MappableCommand {
         goto_line_end, "Goto line end",
         goto_column, "Goto column",
         extend_to_column, "Extend to column",
-        goto_next_buffer, "Goto next buffer",
-        goto_previous_buffer, "Goto previous buffer",
         goto_line_end_newline, "Goto newline at line end",
         goto_first_nonwhitespace, "Goto first non-blank in line",
         goto_next_buffer, "Goto next buffer",

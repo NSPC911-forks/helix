@@ -68,7 +68,7 @@ pub struct TerminalEventReaderHandle;
 
 #[cfg(any(windows, feature = "integration"))]
 impl TerminalEventReaderHandle {
-    pub fn new(terminal: &TerminalBackend) -> Self {
+    pub fn new(_terminal: &TerminalBackend) -> Self {
         Self
     }
 }
