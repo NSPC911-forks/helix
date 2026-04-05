@@ -1033,7 +1033,7 @@ impl EditorView {
                 let style = icon.color().map_or(style, |color| style.fg(color));
 
                 x = surface
-                    .set_stringn(x, viewport.y, format!(" {icon}"), rem_width as usize, style)
+                    .set_stringn(x, viewport.y, if current_doc == doc.id() { format!(" {icon} ") } else { format!(" {icon}") }, rem_width as usize, style)
                     .0;
 
                 if x >= surface.area.right() {

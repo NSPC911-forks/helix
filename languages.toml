@@ -2677,7 +2677,7 @@ language-servers = [
 
 [[grammar]]
 name = "hare"
-source = { git = "https://git.sr.ht/~ecs/tree-sitter-hare", rev = "07035a248943575444aa0b893ffe306e1444c0ab" }
+source = { git = "https://github.com/tree-sitter-grammars/tree-sitter-hare", rev = "eed7ddf6a66b596906aa8ca3d40521b8278adc6f" }
 
 [[language]]
 name = "devicetree"
