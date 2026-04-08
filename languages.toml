@@ -412,7 +412,7 @@ indent = { tab-width = 2, unit = "  " }
 
 [[grammar]]
 name = "toml"
-source = { git = "https://github.com/ikatyang/tree-sitter-toml", rev = "7cff70bbcbbc62001b465603ca1ea88edd668704" }
+source = { git = "https://github.com/tree-sitter-grammars/tree-sitter-toml", rev = "64b56832c2cffe41758f28e05c756a3a98d16f41" }
 
 [[language]]
 name = "awk"
@@ -5151,7 +5151,7 @@ indent = { tab-width = 2, unit = "  " }
 block-comment-tokens = { start = "<!--", end = "-->" }
 word-completion.trigger-length = 4
 
-[[language]] 
+[[language]]
 name = "slisp"
 scope = "source.sl"
 injection-regex = "sl"
