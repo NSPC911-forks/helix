@@ -626,6 +626,11 @@ impl EditorView {
         theme: &Theme,
         overlay_highlights: &mut Vec<OverlayHighlights>,
     ) {
+        // Skip redundant work if no diagnostics.
+        if doc.diagnostics().is_empty() {
+            return;
+        }
+
         use helix_core::diagnostic::{DiagnosticTag, Range, Severity};
         let get_scope_of = |scope| {
             theme
@@ -972,7 +977,7 @@ impl EditorView {
             let rem_width = surface.area.width.saturating_sub(used_width);
 
             x = surface
-                .set_stringn(x, viewport.y, text, rem_width as usize, style)
+                .set_stringn(x, viewport.y, &text, rem_width as usize, style)
                 .0;
 
             if x >= surface.area.right() {
@@ -1531,9 +1536,8 @@ impl EditorView {
 
                     let (view, doc) = current!(cxt.editor);
 
-                    let path = match doc.path() {
-                        Some(path) => path.clone(),
-                        None => return EventResult::Ignored(None),
+                    let Some(path) = doc.path().map(ToOwned::to_owned) else {
+                        return EventResult::Ignored(None);
                     };
 
                     if let Some(char_idx) =
