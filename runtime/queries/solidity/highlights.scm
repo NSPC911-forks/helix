@@ -1,16 +1,21 @@
+; identifiers
+; -----------
+(identifier) @variable
+((identifier) @variable.builtin (#any-of? @variable.builtin "this" "msg" "block" "tx"))
+(yul_identifier) @variable
+
 ; Pragma
 (pragma_directive) @keyword.directive
 (solidity_version_comparison_operator _ @keyword.directive)
 
-
 ; Literals
 ; --------
-
 [
  (string)
  (hex_string_literal)
  (unicode_string_literal)
  (yul_string_literal)
+ (yul_hex_string_literal)
 ] @string
 (hex_string_literal "hex" @string.special.symbol)
 (unicode_string_literal "unicode" @string.special.symbol)
@@ -27,10 +32,8 @@
 
 (comment) @comment
 
-
 ; Definitions and references
 ; -----------
-
 (type_name) @type
 
 [
@@ -38,7 +41,8 @@
   (number_unit)
 ] @type.builtin
 
-(user_defined_type (identifier) @type)
+(user_defined_type (_) @type)
+(user_defined_type_definition name: (identifier) @type)
 (type_alias (identifier) @type)
 
 ; Color payable in payable address conversion as type and not as keyword
@@ -47,24 +51,15 @@
 (type_name "(" @punctuation.bracket "=>" @punctuation.delimiter ")" @punctuation.bracket)
 
 ; Definitions
-(struct_declaration
-  name: (identifier) @type)
-(enum_declaration
-  name: (identifier) @type)
-(contract_declaration
-  name: (identifier) @type)
-(library_declaration
-  name: (identifier) @type)
-(interface_declaration
-  name: (identifier) @type)
-(event_definition
-  name: (identifier) @type)
-
-(function_definition
-  name:  (identifier) @function)
-
-(modifier_definition
-  name:  (identifier) @function)
+(struct_declaration name: (identifier) @type)
+(enum_declaration name: (identifier) @type)
+(contract_declaration name: (identifier) @type)
+(library_declaration name: (identifier) @type)
+(interface_declaration name: (identifier) @type)
+(event_definition name: (identifier) @type)
+(error_declaration name: (identifier) @type)
+(function_definition name: (identifier) @function)
+(modifier_definition name: (identifier) @function)
 (yul_evm_builtin) @function.builtin
 
 ; Use constructor coloring for special functions
@@ -75,14 +70,19 @@
 
 (struct_member name: (identifier) @variable.other.member)
 (enum_value) @constant
+; SCREAMING_SNAKE_CASE identifier are constants
+((identifier) @constant (#match? @constant "^[A-Z][A-Z_]+$"))
+
+; Member access
+(member_expression property: (identifier) @variable.other.member)
 
 ; Invocations
-(emit_statement . (identifier) @type)
-(revert_statement error: (identifier) @type)
-(modifier_invocation (identifier) @function)
+(emit_statement name: (expression (identifier) @type))
+(revert_statement error: (expression (identifier) @type))
+(modifier_invocation . (_) @function)
 
-(call_expression . (member_expression property: (identifier) @function.method))
-(call_expression . (identifier) @function)
+(call_expression . (_(member_expression property: (_) @function.method)))
+(call_expression . (expression (identifier) @function))
 
 ; Function parameters
 (call_struct_argument name: (identifier) @field)
@@ -90,14 +90,18 @@
 (parameter name: (identifier) @variable.parameter)
 
 ; Yul functions
-(yul_function_call function: (yul_identifier) @function)
-(yul_function_definition . (yul_identifier) @function (yul_identifier) @variable.parameter)
-
+(yul_function_call function: (_) @function)
+(yul_function_definition
+  ("function" (yul_identifier) @function "(" (
+      (yul_identifier) @variable.parameter ("," (yul_identifier) @variable.parameter)*
+    )
+  )
+)
 
 ; Structs and members
-(member_expression property: (identifier) @variable.other.member)
-(struct_expression type: ((identifier) @type .))
+(struct_expression type: ((expression (identifier)) @type .))
 (struct_field_assignment name: (identifier) @variable.other.member)
+
 
 ; Tokens
 ; -------
@@ -113,9 +117,9 @@
  "struct"
  "enum"
  "event"
+ "type"
  "assembly"
  "emit"
-
  "public"
  "internal"
  "private"
@@ -123,7 +127,6 @@
  "pure"
  "view"
  "payable"
-
  "modifier"
  "var"
  "let"
@@ -137,6 +140,8 @@
  "storage"
  "calldata"
  "constant"
+ "transient"
+ (immutable)
 ] @keyword.storage.modifier
 
 [
@@ -175,7 +180,6 @@
 (event_parameter "indexed" @keyword)
 
 ; Punctuation
-
 [
   "("
   ")"
@@ -185,7 +189,6 @@
   "}"
 ] @punctuation.bracket
 
-
 [
   "."
   ","
@@ -194,14 +197,11 @@
   "=>"
 ] @punctuation.delimiter
 
-
 ; Operators
-
 [
   "&&"
   "||"
   ">>"
-  ">>>"
   "<<"
   "&"
   "^"
@@ -216,15 +216,12 @@
   "<="
   "=="
   "!="
-  "!=="
   ">="
   ">"
   "!"
   "~"
   "-"
   "+"
-  "delete"
-  "new"
   "++"
   "--"
   "+="
@@ -239,15 +236,10 @@
   ">>="
 ] @operator
 
+; The operator symbol in `using {f as +} for T` / user-definable `operator`.
+(user_definable_operator) @operator
+
 [
   "delete"
   "new"
 ] @keyword.operator
-
-; TODO: move to top when order swapped
-; identifiers
-; -----------
-((identifier) @variable.builtin
- (#match? @variable.builtin "^(this|msg|block|tx)$"))
-(identifier) @variable
-(yul_identifier) @variable

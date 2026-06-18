@@ -25,6 +25,8 @@
  (#any-of? @type.enum.variant.builtin "Some" "None"))
 
 ((pipeline_stage_name) @label)
+((label) @label)
+((label_ref) @label)
 
 ((stage_reference
     stage: (identifier) @label))
@@ -49,20 +51,30 @@
     "mod"
     "where"
     "trait"
+    "for"
+    "pub"
+    "unsafe"
+    "type"
+    "as"
+    "initial"
 ] @keyword
 
 [
- "use"
-] @keyword.import
+  "wire"
+    "super"
+    "lib"
+] @keyword.storage
 
 [
-    "$if"
-    "$else"
-    "$config"
+  "use"
+] @keyword.control.import
+
+[
+  "gen"
 ] @keyword.directive
 
-((comptime_if  ["{" "}"] @keyword.directive))
-((comptime_else  ["{" "}"] @keyword.directive))
+((gen_if_expression  ["if" "else"] @keyword.directive))
+((naked_gen_if_expression  ["if" "else"] @keyword.directive))
 
 ((attribute) ["#" "[" "]"] @punctuation.delimiter)
 
@@ -74,6 +86,8 @@
 
 (bool_literal) @constant.builtin.boolean
 (int_literal) @constant.numeric.integer
+(char_literal) @constant.character
+(string_literal) @string
 
 [
   "&"
@@ -91,6 +105,7 @@
 ] @operator
 
 
+((op_custom_infix) @operator)
 ((op_add) @operator)
 ((op_sub) @operator)
 ((op_mul) @operator)

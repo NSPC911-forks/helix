@@ -34,42 +34,42 @@
   (_) @expr-start
   right: (_) @indent
   (#not-same-line? @indent @expr-start)
-  (#set! "scope" "all")
+
 )
 (compound_assignment_expr
   .
   (_) @expr-start
   right: (_) @indent
   (#not-same-line? @indent @expr-start)
-  (#set! "scope" "all")
+
 )
 (let_declaration
   "let" @expr-start
   value: (_) @indent
   alternative: (_)? @indent
   (#not-same-line? @indent @expr-start)
-  (#set! "scope" "all")
+
 )
 (let_condition
   .
   (_) @expr-start
   value: (_) @indent
   (#not-same-line? @indent @expr-start)
-  (#set! "scope" "all")
+
 )
 (if_expression
   .
   (_) @expr-start
   condition: (_) @indent
   (#not-same-line? @indent @expr-start)
-  (#set! "scope" "all")
+
 )
 (field_pattern
   .
   (_) @expr-start
   pattern: (_) @indent
   (#not-same-line? @indent @expr-start)
-  (#set! "scope" "all")
+
 )
 ; Indent type aliases that span multiple lines, similar to
 ; regular assignment expressions
@@ -78,7 +78,7 @@
   (_) @expr-start
   type: (_) @indent
   (#not-same-line? @indent @expr-start)
-  (#set! "scope" "all")
+
 )
 
 ; Some field expressions where the left part is a multiline expression are not
@@ -102,7 +102,6 @@
   arguments: (_) @outdent
 )
 
-
 ; Indent if guards in patterns.
 ; Since the tree-sitter grammar doesn't create a node for the if expression,
 ; it's not possible to do this correctly in all cases. Indenting the tail of the
@@ -115,10 +114,20 @@
   (#not-same-line? @expr-start @pattern-guard)
 ) @indent
 
+; Align closure parameters if they span more than one line
+(closure_parameters
+  "|"
+  .
+  (_) @anchor
+  (_) @expr-end
+  .
+  (#not-same-line? @anchor @expr-end)
+) @align
+
 (for_expression
   "in" @in
   .
   (_) @indent
   (#not-same-line? @in @indent)
-  (#set! "scope" "all")
-)  
+
+)

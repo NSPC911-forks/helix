@@ -1,6 +1,4 @@
 ;; General syntax
-(ERROR) @error
-
 (command_name) @function
 (caption
   command: _ @function)
@@ -206,7 +204,7 @@
 ((generic_command
   command: (command_name) @_name
   .
-  arg: (curly_group (_) @markup.link.uri))
+  arg: (curly_group (_) @markup.link.url))
   (#match? @_name "^(\\\\url|\\\\href)$"))
 
 ;; File inclusion commands
@@ -230,8 +228,8 @@
   command: _ @keyword.control.import
   path: (curly_group_path) @string)
 (biblatex_include
-  "\\addbibresource" @include
-  glob: (curly_group_glob_pattern) @string.regex)
+  "\\addbibresource" @keyword.control.import
+  glob: (curly_group_glob_pattern) @string.regexp)
 
 (graphics_include
   command: _ @keyword.control.import

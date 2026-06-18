@@ -12,9 +12,12 @@
   (false)
 ] @constant.builtin.boolean
 
-(binaryop) @operator
+; Binary operators are now an `operator:` field whose node is the operator
+; category (additive/comparison/and/bitor/…); capture it directly.
+(binary operator: _ @operator)
 (unaryop) @operator
 
+(id) @variable
 (param identifier: (id) @variable.parameter)
 (bind function: (id) @function)
 (fieldname (id) @variable.other.member)
@@ -35,4 +38,3 @@
   ";"
   "="
 ] @punctuation.delimiter
-(id) @variable

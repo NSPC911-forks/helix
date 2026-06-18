@@ -6,9 +6,18 @@
 
 (num_lit) @constant.numeric
 
-[(bool_lit) (nil_lit)] @constant.builtin
+(bool_lit) @constant.builtin.boolean
+(nil_lit) @constant.builtin
 
 (comment) @comment
+
+;; other symbols
+(sym_lit) @variable
+
+;; other calls
+(list_lit
+ .
+ (sym_lit) @function)
 
 ;; metadata experiment
 (meta_lit
@@ -61,19 +70,11 @@
 ((sym_lit) @operator
  (#match? @operator "^%"))
 
-;; other calls
-(list_lit
- .
- (sym_lit) @function)
-
 ;; interop-ish
 (list_lit
  .
  (sym_lit) @function.method
  (#match? @function.method "^\\."))
-
-;; other symbols
-(sym_lit) @variable
 
 ;; quote
 (quoting_lit) @constant.character.escape

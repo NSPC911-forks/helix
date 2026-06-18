@@ -5,6 +5,10 @@
 ; overrides are unnecessary.
 ; -------
 
+(type_identifier) @type
+(identifier) @variable
+(field_identifier) @variable.other.member
+
 ; -------
 ; Types
 ; -------
@@ -71,6 +75,8 @@
     "<"
     ">"
   ] @punctuation.bracket)
+(closure_parameters
+  "|" @punctuation.bracket)
 
 ; ---
 ; Variables
@@ -92,6 +98,8 @@
 (parameter
 	pattern: (identifier) @variable.parameter)
 
+(closure_parameters
+	(identifier) @variable.parameter)
 ; -------
 ; Keywords
 ; -------
@@ -362,7 +370,3 @@
 ; -------
 
 "?" @special
-
-(type_identifier) @type
-(identifier) @variable
-(field_identifier) @variable.other.member

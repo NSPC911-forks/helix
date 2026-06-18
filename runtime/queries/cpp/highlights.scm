@@ -1,14 +1,58 @@
+; inherits: c
+
+; Constants
+
+(this) @variable.builtin
+(null) @constant.builtin
+
+; Types
+
+(using_declaration ("using" "namespace" (identifier) @namespace))
+(using_declaration ("using" "namespace" (qualified_identifier name: (identifier) @namespace)))
+; Only a Capitalised qualified leaf (`Color::Red`) is an enum variant; a
+; lowercase one (`std::cout`) is a value/member and falls through to @variable.
+((qualified_identifier name: (identifier) @type.enum.variant)
+ (#match? @type.enum.variant "^[A-Z]"))
+; C colours enumerator definitions @constant (see c/highlights.scm); C++ resolves
+; enum values through the qualified path above as @type.enum.variant, so keep the
+; definition matching that.
+(enumerator name: (identifier) @type.enum.variant)
+(namespace_definition name: (namespace_identifier) @namespace)
+(namespace_identifier) @namespace
+
+; Type-introducing declarations
+(concept_definition name: (identifier) @type.definition)
+(alias_declaration name: (type_identifier) @type.definition)
+
+(auto) @type.builtin
+
+(ref_qualifier ["&" "&&"] @type.builtin)
+(reference_declarator ["&" "&&"] @type.builtin)
+(abstract_reference_declarator ["&" "&&"] @type.builtin)
+
+; -------
 ; Functions
-
-; These casts are parsed as function calls, but are not.
-((identifier) @keyword (#eq? @keyword "static_cast"))
-((identifier) @keyword (#eq? @keyword "dynamic_cast"))
-((identifier) @keyword (#eq? @keyword "reinterpret_cast"))
-((identifier) @keyword (#eq? @keyword "const_cast"))
-
+; -------
+; Support up to 4 levels of nesting of qualifiers
+; i.e. a::b::c::d::func();
 (call_expression
   function: (qualified_identifier
     name: (identifier) @function))
+(call_expression
+  function: (qualified_identifier
+    name: (qualified_identifier
+      name: (identifier) @function)))
+(call_expression
+  function: (qualified_identifier
+    name: (qualified_identifier
+      name: (qualified_identifier
+        name: (identifier) @function))))
+(call_expression
+  function: (qualified_identifier
+    name: (qualified_identifier
+      name: (qualified_identifier
+        name: (qualified_identifier
+          name: (identifier) @function)))))
 
 (template_function
   name: (identifier) @function)
@@ -16,38 +60,41 @@
 (template_method
   name: (field_identifier) @function)
 
+; Support up to 4 levels of nesting of qualifiers
+; i.e. a::b::c::d::func();
 (function_declarator
   declarator: (qualified_identifier
     name: (identifier) @function))
-
 (function_declarator
   declarator: (qualified_identifier
     name: (qualified_identifier
       name: (identifier) @function)))
+(function_declarator
+  declarator: (qualified_identifier
+    name: (qualified_identifier
+      name: (qualified_identifier
+        name: (identifier) @function))))
+(function_declarator
+  declarator: (qualified_identifier
+    name: (qualified_identifier
+      name: (qualified_identifier
+        name: (qualified_identifier
+          name: (identifier) @function)))))
 
 (function_declarator
   declarator: (field_identifier) @function)
 
-; Types
+; Constructors
 
-(using_declaration ("using" "namespace" (identifier) @namespace))
-(using_declaration ("using" "namespace" (qualified_identifier name: (identifier) @namespace)))
-(namespace_definition name: (namespace_identifier) @namespace)
-(namespace_identifier) @namespace
-
-(qualified_identifier name: (identifier) @type.enum.variant)
-
-(auto) @type
-"decltype" @type
-
-(ref_qualifier ["&" "&&"] @type.builtin)
-(reference_declarator ["&" "&&"] @type.builtin)
-(abstract_reference_declarator ["&" "&&"] @type.builtin)
-
-; Constants
-
-(this) @variable.builtin
-(nullptr) @constant.builtin
+(class_specifier
+  (type_identifier) @type
+  (field_declaration_list
+    (function_definition
+      (function_declarator
+        (identifier) @constructor)))
+        (#eq? @type @constructor)) 
+(destructor_name "~" @constructor
+  (identifier) @constructor)
 
 ; Parameters
 
@@ -68,7 +115,18 @@
   "<=>"
   "[]"
   "()"
+  "^^" ; C++26 reflection operator (reflect_expression)
 ] @operator
+
+; C++26 splice brackets `[: reflection :]` (splice_specifier / splice_type_specifier).
+(splice_specifier ["[:" ":]"] @punctuation.bracket)
+
+
+; These casts are parsed as function calls, but are not.
+((identifier) @keyword (#eq? @keyword "static_cast"))
+((identifier) @keyword (#eq? @keyword "dynamic_cast"))
+((identifier) @keyword (#eq? @keyword "reinterpret_cast"))
+((identifier) @keyword (#eq? @keyword "const_cast"))
 
 [
   "co_await"
@@ -119,6 +177,7 @@
 
 ; Modifiers that aren't plausibly type/storage related.
 [
+  "decltype"
   "explicit"
   "friend"
   "virtual"
@@ -132,5 +191,3 @@
 ; Strings
 
 (raw_string_literal) @string
-
-; inherits: c

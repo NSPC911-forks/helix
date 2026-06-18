@@ -1,5 +1,20 @@
 (php_tag) @tag
-"?>" @tag
+(php_end_tag) @tag
+
+; Variables
+
+(relative_scope) @variable.builtin
+
+(variable_name) @variable
+
+((name) @constant
+ (#match? @constant "^_?[A-Z][A-Z\\d_]+$"))
+
+((name) @constructor
+ (#match? @constructor "^[A-Z]"))
+
+((name) @variable.builtin
+ (#eq? @variable.builtin "this"))
 
 ; Types
 [
@@ -30,14 +45,15 @@
 (namespace_definition
   name: (namespace_name (name) @namespace))
 
-(namespace_name_as_prefix 
-  (namespace_name (name) @namespace))
+(qualified_name
+  prefix: (namespace_name (name) @namespace))
 
 (namespace_use_clause
   [ (name) @namespace
     (qualified_name (name) @type) ])
 
-(namespace_aliasing_clause (name) @namespace)
+(namespace_use_clause
+  alias: (name) @namespace)
 
 (class_interface_clause
   [(name) @type
@@ -100,6 +116,10 @@
 (argument
     (name) @variable.parameter)
 
+; Property hooks (PHP 8.4): the `get`/`set` accessor name parses as a plain
+; `name`; anchor to the first child so names inside the hook body aren't caught.
+(property_hook . (name) @keyword)
+
 ; Member
 
 (property_element
@@ -109,21 +129,6 @@
   name: (variable_name (name)) @variable.other.member)
 (member_access_expression
   name: (name) @variable.other.member)
-
-; Variables
-
-(relative_scope) @variable.builtin
-
-((name) @constant
- (#match? @constant "^_?[A-Z][A-Z\\d_]+$"))
-
-((name) @constructor
- (#match? @constructor "^[A-Z]"))
-
-((name) @variable.builtin
- (#eq? @variable.builtin "this"))
-
-(variable_name) @variable
 
 ; Attributes
 (attribute_list) @attribute
@@ -160,10 +165,11 @@
   "global" 
   "implements" 
   "insteadof" 
-  "new" 
-  "private" 
-  "protected" 
-  "public" 
+  "new"
+  "print"
+  "private"
+  "protected"
+  "public"
   "clone"
   "unset"
 ] @keyword
@@ -202,10 +208,11 @@
 ] @keyword.control.import
 
 [
-  "return" 
-  "break" 
-  "continue" 
+  "return"
+  "break"
+  "continue"
   "yield"
+  "yield from"
 ] @keyword.control.return
 
 [
@@ -239,6 +246,7 @@
 [
   "static"
   "const"
+  "readonly"
 ] @keyword.storage.modifier
 
 [
@@ -250,7 +258,7 @@
 
 [
   (php_tag)
-  "?>"
+  (php_end_tag)
   "("
   ")"
   "["

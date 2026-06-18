@@ -38,6 +38,17 @@
 (subpath (slash) @function)
 
 
+;;; generic highlighting for all forms
+
+; first symbol in a list form is a combiner call
+(list . (symbol) @function)
+
+; highlight symbols as vars only when they're clearly vars
+(cons (symbol) @variable)
+(scope (symbol) @variable)
+(path form: (symbol) @variable)
+(symbind form: (symbol) @variable)
+
 
 ;;; specific highlighting for builtins & special forms
 
@@ -58,8 +69,8 @@
 (list . (symbol) @function.macro (#match? @function.macro "^(op|fn|current-scope|quote|let|provide|module|or|and|->|curryfn|for|\\$|linux)$"))
 (cons . (symbol) @function.macro (#match? @function.macro "^(op|fn|current-scope|quote|let|provide|module|or|and|->|curryfn|for|\\$|linux)$"))
 
-(list . (symbol) @keyword.builtin (#match? @keyword.builtin "^(do|doc)$"))
-(cons . (symbol) @keyword.builtin (#match? @keyword.builtin "^(do|doc)$"))
+(list . (symbol) @keyword (#match? @keyword "^(do|doc)$"))
+(cons . (symbol) @keyword (#match? @keyword "^(do|doc)$"))
 
 (list . (symbol) @keyword.control.import (#match? @keyword.control.import "^(use|import|load)$"))
 (cons . (symbol) @keyword.control.import (#match? @keyword.control.import "^(use|import|load)$"))
@@ -88,14 +99,3 @@
   .
   (_)
   (symbol) @function)
-
-;;; generic highlighting for all forms
-
-; first symbol in a list form is a combiner call
-(list . (symbol) @function)
-
-; highlight symbols as vars only when they're clearly vars
-(cons (symbol) @variable)
-(scope (symbol) @variable)
-(path form: (symbol) @variable)
-(symbind form: (symbol) @variable)
