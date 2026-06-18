@@ -7,6 +7,7 @@
 - [`[editor.cursor-shape]` Section](#editorcursor-shape-section)
 - [`[editor.picker]` Section](#editorpicker-section)
 - [`[editor.file-picker]` Section](#editorfile-picker-section)
+- [`[editor.file-explorer]` Section](#editorfile-explorer-section)
 - [`[editor.buffer-picker]` Section](#editorbuffer-picker-section)
 - [`[editor.auto-pairs]` Section](#editorauto-pairs-section)
 - [`[editor.auto-save]` Section](#editorauto-save-section)
@@ -29,8 +30,9 @@
 |--|--|---------|
 | `scrolloff` | Number of lines of padding around the edge of the screen when scrolling | `5` |
 | `mouse` | Enable mouse mode | `true` |
-| `default-yank-register` | Default register used for yank/paste | `'"'` |
+| `mouse-yank-register` | Which register to use for mouse yanks. | `*` |
 | `middle-click-paste` | Middle click paste support | `true` |
+| `default-yank-register` | Default register used for yank/paste | `'"'` |
 | `scroll-lines` | Number of lines to scroll per scroll wheel step | `3` |
 | `shell` | Shell to use when running external commands | Unix: `["sh", "-c"]`<br/>Windows: `["cmd", "/C"]` |
 | `line-number` | Line number display: `absolute` simply shows each line's number, while `relative` shows the distance from the current line. When unfocused or in insert mode, `relative` will still show absolute line numbers | `"absolute"` |
@@ -165,6 +167,7 @@ The following statusline elements can be configured:
 | `display-messages`    | Display LSP `window/showMessage` messages below statusline[^1] | `true` |
 | `display-progress-messages` | Display LSP progress messages below statusline[^1]    | `false` |
 | `auto-signature-help` | Enable automatic popup of signature help (parameter hints)  | `true`  |
+| `auto-document-highlight` | Automatically highlight symbol references at the cursor | `false` |
 | `display-inlay-hints` | Display inlay hints[^2]                                     | `false` |
 | `inlay-hints-length-limit` | Maximum displayed length (non-zero number) of inlay hints | Unset by default  |
 | `display-color-swatches` | Show color swatches next to colors | `true` |
@@ -473,7 +476,7 @@ Options for navigating and editing using tab key.
 
 Due to lack of support for S-tab in some terminals, the default keybindings don't fully embrace smart-tab editing experience. If you enjoy smart-tab navigation and a terminal that supports the [Enhanced Keyboard protocol](https://github.com/helix-editor/helix/wiki/Terminal-Support#enhanced-keyboard-protocol), consider setting extra keybindings:
 
-```
+```toml
 [keys.normal]
 tab = "move_parent_node_end"
 S-tab = "move_parent_node_start"
@@ -490,12 +493,12 @@ S-tab = "extend_parent_node_start"
 
 Options for rendering diagnostics inside the text like shown below
 
-```
+```text
 fn main() {
   let foo = bar;
             └─ no such value in this scope
 }
-````
+```
 
 | Key        | Description | Default |
 |------------|-------------|---------|
@@ -509,7 +512,7 @@ The allowed values for `cursor-line` and `other-lines` are: `error`, `warning`, 
 
 The (first) diagnostic with the highest severity that is not shown inline is rendered at the end of the line (as long as its severity is higher than the `end-of-line-diagnostics` config option):
 
-```
+```text
 fn main() {
   let baz = 1;
   let foo = bar; a local variable with a similar name exists: baz

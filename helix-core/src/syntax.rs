@@ -32,7 +32,7 @@ use crate::{indent::IndentQuery, tree_sitter, ChangeSet, Language};
 
 pub use tree_house::{
     highlighter::{Highlight, HighlightEvent},
-    query_iter::QueryIterEvent,
+    query_iter::{CapturedMatch, QueryIterEvent, QueryMatchIter, QueryMatchIterEvent},
     Error as HighlighterError, LanguageLoader, TreeCursor, TREE_SITTER_MATCH_LIMIT,
 };
 
@@ -618,8 +618,9 @@ impl Syntax {
         source: RopeSlice<'a>,
         loader: &'a Loader,
         range: impl RangeBounds<u32>,
-    ) -> QueryIter<'a, 'a, impl FnMut(Language) -> Option<&'a Query> + 'a, ()> {
-        self.query_iter(
+    ) -> QueryMatchIter<'a, 'a, impl FnMut(Language) -> Option<&'a Query> + 'a, ()> {
+        QueryMatchIter::new(
+            &self.inner,
             source,
             |lang| loader.tag_query(lang).map(|q| &q.query),
             range,
@@ -1086,7 +1087,7 @@ pub fn pretty_print_tree<W: fmt::Write>(fmt: &mut W, node: Node) -> fmt::Result 
 }
 
 fn node_is_visible(node: &Node) -> bool {
-    node.is_missing() || (node.is_named() && node.grammar().node_kind_is_visible(node.kind_id()))
+    node.is_named() && node.grammar().node_kind_is_visible(node.kind_id())
 }
 
 fn format_anonymous_node_kind(kind: &str) -> Cow<'_, str> {
