@@ -1023,7 +1023,8 @@ impl EditorView {
             .unwrap_or_else(|| theme.get("ui.statusline.active"));
 
         let bufferline_inactive = theme
-            .try_get("ui.bufferline")
+            .try_get("ui.bufferline.inactive")
+            .or_else(|| theme.try_get("ui.bufferline"))
             .unwrap_or_else(|| theme.get("ui.statusline.inactive"));
 
         let mut x = viewport.x;
