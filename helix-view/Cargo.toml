@@ -65,6 +65,8 @@ thiserror.workspace = true
 indexmap = "2.5.0"
 
 kstring = "2.0"
+smartstring.workspace = true
+hashbrown.workspace = true
 
 [target.'cfg(windows)'.dependencies]
 clipboard-win = { version = "5.4", features = ["std"] }

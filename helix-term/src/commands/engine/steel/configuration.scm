@@ -656,22 +656,9 @@
 ;;     'tab #f
 ;;     'newline #f)
 ;;```
-;; * ws-chars:
-;;   manually set visible whitespace characters with a hashmap
-;;   character options (specified in hashmap):
-;;```scheme
-;;   (hash
-;;     'space #\·
-;;     'nbsp #\⍽
-;;     'nnbsp #\␣
-;;     'tab #\→
-;;     'newline #\⏎
-;;     ; Tabs will look like "→···" (depending on tab width)
-;;     'tabpad #\·)
-;;```
 ;; # Examples
 ;; ```scheme
-;; (whitespace (ws-visible #t) (ws-chars (hash 'space #\·)) (ws-render (hash 'tab #f)))
+;; (whitespace (ws-visible #t) (ws-render (hash 'tab #f)))
 ;; ```
 (define (whitespace . args)
   (helix.register-whitespace
@@ -966,12 +953,6 @@
 (define (ws-visible arg)
   (lambda (picker)
     (helix.ws-visible picker arg)
-    picker))
-
-(provide ws-chars)
-(define (ws-chars arg)
-  (lambda (picker)
-    (helix.ws-chars picker arg)
     picker))
 
 (provide ws-render)

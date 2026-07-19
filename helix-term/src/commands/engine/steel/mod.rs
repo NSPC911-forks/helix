@@ -826,24 +826,6 @@ fn ws_visible(config: &mut WhitespaceConfig, option: bool) {
     config.render = WhitespaceRender::Basic(value);
 }
 
-fn ws_chars(config: &mut WhitespaceConfig, option: HashMap<SteelVal, char>) -> anyhow::Result<()> {
-    for (k, v) in option {
-        match k {
-            SteelVal::StringV(s) | SteelVal::SymbolV(s) => match s.as_str() {
-                "space" => config.characters.space = v,
-                "tab" => config.characters.tab = v,
-                "nbsp" => config.characters.nbsp = v,
-                "nnbsp" => config.characters.nnbsp = v,
-                "newline" => config.characters.newline = v,
-                "tabpad" => config.characters.tabpad = v,
-                unknown => anyhow::bail!("Unrecognized key: {}", unknown),
-            },
-            other => anyhow::bail!("Unrecognized key option: {}", other),
-        }
-    }
-    Ok(())
-}
-
 fn ws_render(config: &mut WhitespaceConfig, option: HashMap<SteelVal, bool>) -> anyhow::Result<()> {
     #[derive(Default)]
     struct RenderFlags {
@@ -1112,7 +1094,6 @@ fn load_configuration_api(engine: &mut Engine, generate_sources: bool) {
             HelixConfiguration::whitespace,
         )
         .register_fn("ws-visible", ws_visible)
-        .register_fn("ws-chars", ws_chars)
         .register_fn("ws-render", ws_render);
 
     module
@@ -1399,7 +1380,7 @@ fn current_theme_name(cx: &mut Context) -> SteelString {
 }
 
 fn current_theme(cx: &mut Context) -> SteelTheme {
-    SteelTheme(cx.editor.theme.clone())
+    SteelTheme((*cx.editor.theme).clone())
 }
 
 fn get_style(theme: &SteelTheme, name: SteelString) -> helix_view::theme::Style {
@@ -2985,10 +2966,6 @@ impl HelixConfiguration {
 
         if let Some(right) = config.get("right") {
             app_config.editor.statusline.right = steel_list_to_elements(right)?;
-        }
-
-        if let Some(separator) = config.get("separator") {
-            app_config.editor.statusline.separator = String::from_steelval(separator)?;
         }
 
         if let Some(normal_mode) = config.get("mode-normal") {

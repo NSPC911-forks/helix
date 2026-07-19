@@ -18,6 +18,7 @@ steel = ["dep:steel-core", "helix-view/steel", "helix-core/steel"]
 [dependencies]
 helix-view = { path = "../helix-view", features = ["term"] }
 helix-core = { path = "../helix-core" }
+helix-stdx = { path = "../helix-stdx" }
 
 bitflags.workspace = true
 cassowary = "0.3"
