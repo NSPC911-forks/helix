@@ -255,6 +255,7 @@ impl<T: Item + 'static> Component for Menu<T> {
                 Some(SmartTabConfig {
                     enable: true,
                     supersede_menu: true,
+                    ..
                 })
             )
         {

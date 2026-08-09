@@ -574,6 +574,7 @@ pub enum KittyKeyboardProtocolConfig {
 pub struct SmartTabConfig {
     pub enable: bool,
     pub supersede_menu: bool,
+    pub accept_inline_completion: bool,
 }
 
 impl Default for SmartTabConfig {
@@ -581,6 +582,7 @@ impl Default for SmartTabConfig {
         SmartTabConfig {
             enable: true,
             supersede_menu: false,
+            accept_inline_completion: false,
         }
     }
 }
