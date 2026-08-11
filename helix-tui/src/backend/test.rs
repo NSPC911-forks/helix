@@ -16,6 +16,7 @@ pub struct TestBackend {
     cursor: bool,
     pos: (u16, u16),
     title: String,
+    title_updates: usize,
 }
 
 /// Returns a string representation of the given buffer for debugging purpose.
@@ -56,6 +57,7 @@ impl TestBackend {
             cursor: false,
             pos: (0, 0),
             title: String::new(),
+            title_updates: 0,
         }
     }
 
@@ -67,6 +69,10 @@ impl TestBackend {
         self.buffer.resize(Rect::new(0, 0, width, height));
         self.width = width;
         self.height = height;
+    }
+
+    pub fn title_updates(&self) -> usize {
+        self.title_updates
     }
 
     pub fn assert_buffer(&self, expected: &Buffer) {
@@ -148,6 +154,7 @@ impl Backend for TestBackend {
 
     fn set_title(&mut self, title: &str) -> Result<(), io::Error> {
         self.title = title.into();
+        self.title_updates += 1;
         Ok(())
     }
 

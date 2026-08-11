@@ -12,6 +12,17 @@ fn terminal_buffer_size_should_not_be_limited() {
     assert_eq!(size.height, 400);
 }
 
+#[test]
+fn terminal_only_sets_changed_titles() {
+    let mut terminal = Terminal::new(TestBackend::new(80, 24)).unwrap();
+
+    terminal.set_title("one").unwrap();
+    terminal.set_title("one").unwrap();
+    terminal.set_title("two").unwrap();
+
+    assert_eq!(terminal.backend().title_updates(), 2);
+}
+
 // #[test]
 // fn terminal_draw_returns_the_completed_frame() -> Result<(), Box<dyn Error>> {
 //     let backend = TestBackend::new(10, 10);

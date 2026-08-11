@@ -69,6 +69,7 @@ where
     current: usize,
     /// Kind of cursor (hidden or others)
     cursor_kind: CursorKind,
+    title: Option<String>,
     /// Viewport
     viewport: Viewport,
     /// Set to request a full clear. The erase is deferred to the next `flush` so it is emitted
@@ -113,6 +114,7 @@ where
             ],
             current: 0,
             cursor_kind: CursorKind::Block,
+            title: None,
             viewport: options.viewport,
             force_clear: false,
         })
@@ -247,7 +249,11 @@ where
     }
 
     pub fn set_title(&mut self, title: &str) -> io::Result<()> {
-        self.backend.set_title(title)
+        if self.title.as_deref() != Some(title) {
+            self.backend.set_title(title)?;
+            self.title = Some(title.into());
+        }
+        Ok(())
     }
 
     /// Clear the terminal and force a full redraw on the next draw call.
