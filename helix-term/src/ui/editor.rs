@@ -461,7 +461,11 @@ impl EditorView {
 
             Self::render_rulers(editor, doc, view, inner, surface, theme);
 
-            if config.welcome_screen && doc.path().is_none() && doc.version() == 0 && editor.documents.len() == 1 {
+            if config.welcome_screen
+                && doc.path().is_none()
+                && doc.version() == 0
+                && editor.documents.len() == 1
+            {
                 Self::render_welcome(
                     theme,
                     view,

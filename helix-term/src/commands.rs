@@ -3197,7 +3197,14 @@ fn enter_insert_mode(cx: &mut Context) {
 // inserts at the start of each selection
 fn insert_mode(cx: &mut Context) {
     enter_insert_mode(cx);
-    let (view, doc) = current!(cx.editor);
+
+    // TODO: @Matt
+    // Could be called during bootup which panics the editor - a better
+    // thing might be to either call startup _after_ the documents have
+    // been opened?
+    let Some((view, doc)) = try_current!(cx.editor) else {
+        return;
+    };
 
     log::trace!(
         "entering insert mode with sel: {:?}, text: {:?}",
@@ -4523,8 +4530,12 @@ pub mod insert {
 
         if matches!(
             cx.editor.config().smart_tab,
-            Some(SmartTabConfig { accept_inline_completion: true, .. })
-        ) && doc.inline_completions.current().is_some() {
+            Some(SmartTabConfig {
+                accept_inline_completion: true,
+                ..
+            })
+        ) && doc.inline_completions.current().is_some()
+        {
             inline_completion_accept(cx);
             return;
         }
