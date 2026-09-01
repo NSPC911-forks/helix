@@ -4556,7 +4556,7 @@ pub mod insert {
                 if doc.active_snippet.is_some() {
                     goto_next_tabstop(cx);
                 } else {
-                    move_parent_node_end(cx);
+                    insert_tab(cx);
                 }
                 return;
             }
