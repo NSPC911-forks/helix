@@ -1919,6 +1919,14 @@ fn lsp_restart(cx: &mut compositor::Context, args: Args, event: PromptEvent) -> 
         valid
     };
 
+    let restarted_language_server_ids: Vec<_> = cx
+        .editor
+        .language_servers
+        .iter_clients()
+        .filter(|client| language_servers.contains(&client.name()))
+        .map(|client| client.id())
+        .collect();
+
     let mut errors = Vec::new();
     for server in language_servers.iter() {
         match cx
@@ -1942,6 +1950,15 @@ fn lsp_restart(cx: &mut compositor::Context, args: Args, event: PromptEvent) -> 
         }
     }
 
+    cx.editor.diagnostics.retain(|_, diagnostics| {
+        diagnostics.retain(|(_, provider)| {
+            provider
+                .language_server_id()
+                .is_none_or(|id| !restarted_language_server_ids.contains(&id))
+        });
+        !diagnostics.is_empty()
+    });
+
     // This collect is needed because refresh_language_server would need to re-borrow editor.
     let document_ids_to_refresh: Vec<DocumentId> = cx
         .editor
@@ -1961,6 +1978,10 @@ fn lsp_restart(cx: &mut compositor::Context, args: Args, event: PromptEvent) -> 
         .collect();
 
     for document_id in document_ids_to_refresh {
+        let doc = doc_mut!(cx.editor, &document_id);
+        for id in &restarted_language_server_ids {
+            doc.clear_diagnostics_for_language_server(*id);
+        }
         cx.editor.refresh_language_servers(document_id);
     }
 
