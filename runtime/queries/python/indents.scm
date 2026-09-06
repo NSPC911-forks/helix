@@ -32,6 +32,9 @@
 ; Workaround for the tree-sitter grammar creating large errors when a
 ; try_statement is missing the except/finally clause
 (ERROR
+  "if"
+  ":" @indent @extend)
+(ERROR
   "try"
   .
   ":" @indent @extend)
@@ -39,8 +42,7 @@
   .
   "def") @indent @extend
 (ERROR
-  (block) @indent @extend
-  (#set! "scope" "all"))
+  (block) @indent @extend)
 
 [
   (if_statement)
@@ -82,8 +84,7 @@
 
 (parameters
   .
-  (identifier) @anchor
-  (#set! "scope" "tail")) @align
+  (identifier) @anchor) @align
 (argument_list
   .
   (_) @anchor
