@@ -29,7 +29,7 @@ use crate::{
     compositor::{Compositor, Event},
     config::Config,
     handlers,
-    job::Jobs,
+    job::{InteractiveCommand, Jobs},
     keymap::Keymaps,
     ui::{self, overlay::overlaid},
 };
@@ -266,6 +266,7 @@ impl Application {
             signal::SIGUSR1,
             signal::SIGTERM,
             signal::SIGINT,
+            signal::SIGQUIT,
         ])
         .context("build signal handler")?;
 
@@ -363,7 +364,9 @@ impl Application {
                     };
                 }
                 Some(event) = input_stream.next() => {
-                    self.handle_terminal_events(event).await;
+                    if !self.handle_terminal_events(event).await {
+                        return false;
+                    }
                 }
                 Some(callback) = self.jobs.callbacks.recv() => {
                     if let Some(job) = self.jobs.handle_callback(&mut self.editor, &mut self.compositor, Ok(Some(callback))) {
@@ -636,7 +639,7 @@ impl Application {
                 self.refresh_config();
                 self.render().await;
             }
-            signal::SIGTERM | signal::SIGINT => {
+            signal::SIGTERM | signal::SIGINT | signal::SIGQUIT => {
                 self.restore_term().unwrap();
                 return false;
             }
@@ -644,6 +647,97 @@ impl Application {
         }
 
         true
+    }
+
+    async fn run_interactive(&mut self, interactive: InteractiveCommand) -> bool {
+        use std::process::Stdio;
+
+        if let Err(err) = self.restore_term() {
+            self.editor
+                .set_error(format!("Failed to release terminal: {err}"));
+            return true;
+        }
+
+        let mut refresh_config = false;
+        let mut keep_running = true;
+        let result = if let Some((program, args)) = interactive.shell.split_first() {
+            match tokio::process::Command::new(program)
+                .args(args)
+                .arg(interactive.command)
+                .stdin(Stdio::inherit())
+                .stdout(Stdio::inherit())
+                .stderr(Stdio::inherit())
+                .spawn()
+            {
+                Ok(mut child) => {
+                    #[cfg(windows)]
+                    let result = child.wait().await;
+
+                    #[cfg(not(windows))]
+                    let result = loop {
+                        use futures_util::StreamExt;
+
+                        tokio::select! {
+                            biased;
+                            Some(signal) = self.signals.next() => match signal {
+                                signal::SIGINT | signal::SIGQUIT | signal::SIGCONT => {},
+                                signal::SIGUSR1 => refresh_config = true,
+                                signal::SIGTERM => {
+                                    keep_running = false;
+                                    let _ = child.kill().await;
+                                    break child.wait().await;
+                                }
+                                signal::SIGTSTP => {
+                                    // The child shares Helix's process group, so suspend the whole job.
+                                    let res = unsafe { libc::kill(0, signal::SIGSTOP) };
+                                    if res != 0 {
+                                        break Err(std::io::Error::last_os_error());
+                                    }
+                                }
+                                _ => unreachable!(),
+                            },
+                            status = child.wait() => break status,
+                        }
+                    };
+
+                    result.map_err(anyhow::Error::from)
+                }
+                Err(err) => Err(err.into()),
+            }
+        } else {
+            Err(anyhow::anyhow!("No shell set"))
+        };
+
+        if let Err(err) = self.terminal.claim() {
+            self.editor
+                .set_error(format!("Failed to reclaim terminal: {err}"));
+            return false;
+        }
+
+        if refresh_config {
+            self.refresh_config();
+        }
+
+        match result {
+            Ok(status) if status.success() => self.editor.set_status("Command finished"),
+            Ok(status) => self.editor.set_error(match status.code() {
+                Some(code) => format!("Command exited with status {code}"),
+                None => "Command terminated by signal".to_string(),
+            }),
+            Err(err) => self
+                .editor
+                .set_error(format!("Failed to run command: {err}")),
+        }
+
+        let area = self
+            .terminal
+            .autoresize()
+            .expect("Unable to determine terminal size");
+        self.compositor.resize(area);
+        self.terminal.clear().expect("couldn't clear terminal");
+        self.render().await;
+
+        keep_running
     }
 
     pub async fn handle_idle_timeout(&mut self) {
@@ -767,7 +861,7 @@ impl Application {
         false
     }
 
-    pub async fn handle_terminal_events(&mut self, event: std::io::Result<TerminalEvent>) {
+    pub async fn handle_terminal_events(&mut self, event: std::io::Result<TerminalEvent>) -> bool {
         #[cfg(not(windows))]
         use termina::escape::csi;
 
@@ -805,7 +899,7 @@ impl Application {
                 if mode_changed && config.theme.as_ref().is_some_and(|t| t.is_adaptive()) {
                     self.theme_mode = Some(mode);
                     Self::load_configured_theme(
-                        &mut self.editor,
+                        cx.editor,
                         &config,
                         &mut self.terminal,
                         self.theme_mode,
@@ -839,8 +933,16 @@ impl Application {
             event => self.compositor.handle_event(&event.into(), &mut cx),
         };
 
-        if should_redraw && !self.editor.should_close() {
+        let interactive = cx.jobs.take_interactive();
+        drop(cx);
+
+        if let Some(command) = interactive {
+            self.run_interactive(command).await
+        } else if should_redraw && !self.editor.should_close() {
             self.render().await;
+            true
+        } else {
+            true
         }
     }
 
