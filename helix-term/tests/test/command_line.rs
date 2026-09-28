@@ -158,3 +158,9 @@ async fn percent_escaping() -> anyhow::Result<()> {
     .await?;
     Ok(())
 }
+
+#[cfg(unix)]
+#[tokio::test(flavor = "multi_thread")]
+async fn run_interactive() -> anyhow::Result<()> {
+    test_statusline(":run-interactive true", "Command finished", Severity::Info).await
+}

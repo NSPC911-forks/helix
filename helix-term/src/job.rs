@@ -12,6 +12,11 @@ use tokio::sync::mpsc::{channel, Receiver, Sender};
 
 pub type EditorCompositorJobsCallback =
     Box<dyn FnOnce(&mut Editor, &mut Compositor, &mut Jobs) + Send>;
+pub struct InteractiveCommand {
+    pub shell: Vec<String>,
+    pub command: String,
+}
+
 pub type EditorCompositorCallback = Box<dyn FnOnce(&mut Editor, &mut Compositor) + Send>;
 pub type EditorCallback = Box<dyn FnOnce(&mut Editor) + Send>;
 pub type EditorCallbackFollowup = Box<dyn FnOnce(&mut Editor) -> Option<Job> + Send>;
@@ -70,6 +75,7 @@ pub struct Jobs {
     pub local_futures: FuturesUnordered<ThreadLocalJob>,
     pub callbacks: Receiver<Callback>,
     pub status_messages: Receiver<StatusMessage>,
+    interactive_command: Option<InteractiveCommand>,
 }
 
 impl Job {
@@ -106,7 +112,16 @@ impl Jobs {
             local_futures: FuturesUnordered::new(),
             callbacks: rx,
             status_messages,
+            interactive_command: None,
         }
+    }
+
+    pub fn run_interactive(&mut self, shell: Vec<String>, command: String) {
+        self.interactive_command = Some(InteractiveCommand { shell, command });
+    }
+
+    pub fn take_interactive(&mut self) -> Option<InteractiveCommand> {
+        self.interactive_command.take()
     }
 
     pub fn spawn<F: Future<Output = anyhow::Result<()>> + Send + 'static>(&mut self, f: F) {
