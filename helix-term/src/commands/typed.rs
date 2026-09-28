@@ -2796,6 +2796,20 @@ fn run_shell_command(
     Ok(())
 }
 
+fn run_interactive(
+    cx: &mut compositor::Context,
+    args: Args,
+    event: PromptEvent,
+) -> anyhow::Result<()> {
+    if event != PromptEvent::Validate {
+        return Ok(());
+    }
+
+    cx.jobs
+        .run_interactive(cx.editor.config().shell.clone(), args.join(" "));
+    Ok(())
+}
+
 fn reset_diff_change(
     cx: &mut compositor::Context,
     _args: Args,
@@ -4082,6 +4096,14 @@ pub const TYPABLE_COMMAND_LIST: &[TypableCommand] = &[
         aliases: &["sh", "!"],
         doc: "Run a shell command",
         fun: run_shell_command,
+        completer: SHELL_COMPLETER,
+        signature: SHELL_SIGNATURE,
+    },
+    TypableCommand {
+        name: "run-interactive",
+        aliases: &[],
+        doc: "Run a shell command with inherited standard streams",
+        fun: run_interactive,
         completer: SHELL_COMPLETER,
         signature: SHELL_SIGNATURE,
     },
