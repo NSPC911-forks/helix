@@ -106,7 +106,7 @@ static EVENT_READER: OnceCell<EventReader> = OnceCell::new();
 static CTX: &str = "*helix.cx*";
 static CONFIG: &str = "*helix.config*";
 
-fn install_event_reader(event_reader: TerminalEventReaderHandle) {
+fn install_event_reader(_event_reader: TerminalEventReaderHandle) {
     #[cfg(feature = "integration")]
     {}
 
