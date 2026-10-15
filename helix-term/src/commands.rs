@@ -6557,28 +6557,28 @@ fn select_textobject(cx: &mut Context, objtype: textobject::TextObject) {
         ("w", "Word"),
         ("W", "WORD"),
         ("p", "Paragraph"),
-        ("t", "Type definition (tree-sitter)"),
-        ("f", "Function (tree-sitter)"),
-        ("a", "Argument/parameter (tree-sitter)"),
-        ("c", "Comment (tree-sitter)"),
-        ("T", "Test (tree-sitter)"),
-        ("e", "Data structure entry (tree-sitter)"),
-        ("m", "Closest surrounding pair (tree-sitter)"),
-        ("g", "Change"),
-        ("x", "(X)HTML element (tree-sitter)"),
-        (" ", "... or any character acting as a pair"),
+        ("t", " Type Def"),
+        ("f", " Function"),
+        ("a", " Argument"),
+        ("c", " Comment"),
+        ("T", " Test"),
+        ("e", " Entry"),
+        ("m", " Pair"),
+        ("x", " (X)HTML Node"),
+        ("g", "󰊢 Change"),
+        ("…", "any paired char"),
     ];
 
     cx.editor.autoinfo = Some(Info::new(title, &help_text));
 }
 
 static SURROUND_HELP_TEXT: [(&str, &str); 6] = [
-    ("m", "Nearest matching pair"),
-    ("( or )", "Parentheses"),
-    ("{ or }", "Curly braces"),
-    ("< or >", "Angled brackets"),
-    ("[ or ]", "Square brackets"),
-    (" ", "... or any character"),
+    ("  m  ", "Nearest pair"),
+    ("( | )", "Parentheses"),
+    ("{ | }", "Curly braces"),
+    ("< | >", "Angled brackets"),
+    ("[ | ]", "Square brackets"),
+    (" ... ", "any paired char"),
 ];
 
 fn surround_add(cx: &mut Context) {
