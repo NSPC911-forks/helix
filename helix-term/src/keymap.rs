@@ -55,17 +55,30 @@ impl KeyTrieNode {
     }
 
     pub fn infobox(&self) -> Info {
-        let mut body: Vec<(BTreeSet<KeyEvent>, &str)> = Vec::with_capacity(self.len());
+        let mut body: Vec<(BTreeSet<KeyEvent>, Cow<'_, str>)> = Vec::with_capacity(self.len());
         for (&key, trie) in self.iter() {
             let desc = match trie {
                 KeyTrie::MappableCommand(cmd) => {
                     if cmd.name() == "no_op" {
                         continue;
                     }
-                    cmd.doc()
+                    Cow::Borrowed(cmd.doc())
                 }
-                KeyTrie::Node(n) => &n.name,
-                KeyTrie::Sequence(_) => "[Multiple commands]",
+                KeyTrie::Node(n) => Cow::Borrowed(n.name.as_str()),
+                KeyTrie::Sequence(commands) => {
+                    let commands = commands
+                        .iter()
+                        .map(|cmd| match cmd {
+                            MappableCommand::Typable { name, args, .. } => {
+                                format!(":{name} {args}").trim_end().to_owned()
+                            }
+                            _ => cmd.to_string(),
+                        })
+                        .collect::<Vec<_>>()
+                        .join(", ");
+                    body.push((BTreeSet::from([key]), Cow::Owned(format!("[{commands}]"))));
+                    continue;
+                }
             };
             match body.iter().position(|(_, d)| d == &desc) {
                 Some(pos) => {
@@ -82,7 +95,9 @@ impl KeyTrieNode {
                 (events.join(", "), desc)
             })
             .collect();
-        Info::new(self.name.clone(), &body)
+        let mut info = Info::new(self.name.clone(), &body);
+        info.width = info.width.min(50);
+        info
     }
 }
 
@@ -408,6 +423,31 @@ mod tests {
     use helix_core::hashmap;
     use helix_view::input::{KeyCode, KeyEvent, KeyModifiers};
     use indexmap::indexmap;
+
+    #[test]
+    fn infobox_shows_command_sequences_separately() {
+        let keymap: KeyTrie = toml::from_str(
+            r#"
+a = ["select_all", ":pipe sort"]
+b = ["select_all", ":pipe uniq"]
+c = ["select_all", ":pipe sort"]
+d = "move_char_left"
+e = "move_char_left"
+f = "no_op"
+"#,
+        )
+        .unwrap();
+
+        let info = keymap.node().unwrap().infobox();
+        assert_eq!(
+            info.text,
+            "a     [select_all, :pipe sort]\n\
+b     [select_all, :pipe uniq]\n\
+c     [select_all, :pipe sort]\n\
+d, e  Move left\n"
+        );
+        assert_eq!(info.height, 4);
+    }
 
     #[test]
     #[should_panic]
