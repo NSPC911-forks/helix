@@ -36,7 +36,8 @@ impl Info {
             .iter()
             .map(|(item, _)| item.as_ref().width())
             .max()
-            .unwrap();
+            .unwrap()
+            .min(3);
         let mut text = String::new();
 
         for (item, desc) in body {
