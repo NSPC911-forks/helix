@@ -96,7 +96,7 @@ impl KeyTrieNode {
             })
             .collect();
         let mut info = Info::new(self.name.clone(), &body);
-        info.width = info.width.min(50);
+        info.width = info.width.min(60);
         info
     }
 }
