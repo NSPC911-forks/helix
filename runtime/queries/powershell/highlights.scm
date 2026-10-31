@@ -162,9 +162,6 @@
 
 (array_expression) @punctuation.bracket
 
-(assignment_expression
-  value: (pipeline) @variable)
-
 (format_operator) @operator
 
 (command_parameter) @variable.parameter

@@ -542,7 +542,12 @@ pub mod tasks {
             let mut off = 0usize;
             for l in &lines {
                 line_start.push(off);
-                off += l.len() + 1;
+                off += l.len()
+                    + if source.as_bytes().get(off + l.len()) == Some(&b'\r') {
+                        2
+                    } else {
+                        1
+                    };
             }
 
             let rel = path.strip_prefix(&root).unwrap_or(&path).display();

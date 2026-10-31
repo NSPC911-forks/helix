@@ -4315,7 +4315,7 @@ indent = { tab-width = 4, unit = "    " }
 
 [[grammar]]
 name = "powershell"
-source = { git = "https://github.com/airbus-cert/tree-sitter-powershell", rev = "c9316be0faca5d5b9fd3b57350de650755f42dc0" }
+source = { git = "https://github.com/airbus-cert/tree-sitter-powershell", rev = "63aed89ecbdf9c9c4e258f4d4e16538a385c8700" }
 
 [[language]]
 name = "ld"
